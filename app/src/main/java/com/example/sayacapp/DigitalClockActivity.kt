@@ -17,6 +17,7 @@ class DigitalClockActivity : AppCompatActivity() {
     private val timeZones = listOf(
         "Europe/Istanbul" to "Istanbul",
         "Asia/Tokyo" to "Tokyo",
+        "Asia/Tokyo" to "Tokyo (Ek)",
         "America/New_York" to "New York",
         "Europe/London" to "London",
         "Asia/Dubai" to "Dubai",
@@ -30,8 +31,9 @@ class DigitalClockActivity : AppCompatActivity() {
         clockContainer = findViewById(R.id.clockContainer)
 
         // Create clock displays for each timezone
-        for ((zoneId, zoneName) in timeZones) {
-            val clockView = createClockView(zoneId, zoneName)
+        for ((index, pair) in timeZones.withIndex()) {
+            val (zoneId, zoneName) = pair
+            val clockView = createClockView(zoneId, zoneName, index)
             clockContainer.addView(clockView)
         }
 
@@ -39,7 +41,7 @@ class DigitalClockActivity : AppCompatActivity() {
         updateTime()
     }
 
-    private fun createClockView(zoneId: String, zoneName: String): LinearLayout {
+    private fun createClockView(zoneId: String, zoneName: String, index: Int): LinearLayout {
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutParams = LinearLayout.LayoutParams(
@@ -61,7 +63,7 @@ class DigitalClockActivity : AppCompatActivity() {
 
         // Time Display
         val timeView = TextView(this).apply {
-            tag = zoneId
+            tag = "time_$index"
             textSize = 32f
             setTextColor(getColor(R.color.black))
             typeface = android.graphics.Typeface.MONOSPACE
@@ -69,7 +71,7 @@ class DigitalClockActivity : AppCompatActivity() {
 
         // Date Display
         val dateView = TextView(this).apply {
-            tag = "date_$zoneId"
+            tag = "date_$index"
             textSize = 12f
             setTextColor(getColor(R.color.secondary))
         }
@@ -82,7 +84,8 @@ class DigitalClockActivity : AppCompatActivity() {
     }
 
     private fun updateTime() {
-        for ((zoneId, _) in timeZones) {
+        for ((index, pair) in timeZones.withIndex()) {
+            val (zoneId, _) = pair
             val zoneTime = ZonedDateTime.now(ZoneId.of(zoneId))
 
             // Format time
@@ -94,8 +97,8 @@ class DigitalClockActivity : AppCompatActivity() {
             val dateString = zoneTime.format(dateFormatter)
 
             // Update UI
-            clockContainer.findViewWithTag<TextView>(zoneId)?.text = timeString
-            clockContainer.findViewWithTag<TextView>("date_$zoneId")?.text = dateString
+            clockContainer.findViewWithTag<TextView>("time_$index")?.text = timeString
+            clockContainer.findViewWithTag<TextView>("date_$index")?.text = dateString
         }
 
         // Schedule next update
